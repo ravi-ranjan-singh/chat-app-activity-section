@@ -1,7 +1,7 @@
 const Activity = require('./../models/activityModel');
 
 exports.getAllActivities = async (req, res, next) => {
-  const activities = await Activity.find({}).sort({ 'votes.up': 1 });
+  const activities = await Activity.find({}).sort({ 'votes.diff': -1 });
   res.status(200).json({
     status: 'success',
     data: {
@@ -21,16 +21,21 @@ exports.getActivity = async (req, res, next) => {
 };
 
 exports.addActivity = async (req, res, next) => {
-  let file = {
-    Ftype: req.file.mimetype.split('/')[0],
-    name: req.file.filename,
-  };
+  if (req.file) {
+    let file = {
+      Ftype: req.file.mimetype.split('/')[0],
+      name: req.file.filename,
+    };
+    req.body.file = file;
+  }
   if (!req.body.location) {
     req.body.location = {
       coordinates: ['77.206612', '28.524578'],
     };
   }
-  req.body.file = file;
+  if (req.body.votes) {
+    req.body.votes.diff = req.body.votes.up - req.body.votes.down;
+  }
   const activity = await Activity.create(req.body);
   res.status(201).json({
     status: 'success',
@@ -41,6 +46,9 @@ exports.addActivity = async (req, res, next) => {
 };
 
 exports.updateActivity = async (req, res, next) => {
+  if (req.body.votes) {
+    req.body.votes.diff = req.body.votes.up - req.body.votes.down;
+  }
   const activity = await Activity.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });

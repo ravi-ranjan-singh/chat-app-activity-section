@@ -9,6 +9,7 @@ const activitySchema = new mongoose.Schema({
   },
   time: {
     type: String,
+    default: new Date().toLocaleTimeString(),
   },
   date: {
     type: Date,
@@ -57,6 +58,7 @@ const activitySchema = new mongoose.Schema({
   votes: {
     up: { type: Number, default: 0 },
     down: { type: Number, default: 0 },
+    diff: { type: Number, default: 0 },
   },
 });
 
